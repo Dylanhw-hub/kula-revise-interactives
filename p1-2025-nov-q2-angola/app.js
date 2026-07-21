@@ -535,8 +535,12 @@ function render() {
     // Mobile: start collapsed
     if (window.innerWidth < 600) {
         const col = document.querySelector('.sp-collapsible');
-        if (col && !ans[q.id]?.done)
+        const tgl = document.querySelector('.sp-toggle');
+        if (col && !ans[q.id]?.done) {
             col.style.display = 'none';
+            if (tgl)
+                tgl.textContent = '▸ Show source';
+        }
     }
     // Desktop: restore source panel scroll position between questions
     if (window.innerWidth >= 900) {
@@ -887,11 +891,15 @@ document.getElementById('tb-qt').textContent = QS.length;
     const bar = document.querySelector('.top-bar');
     if (!bar)
         return;
-    const btn = document.createElement('button');
-    btn.className = 'theme-toggle';
-    btn.id = 'theme-toggle';
-    btn.setAttribute('aria-label', 'Toggle dark mode');
-    btn.title = 'Toggle dark mode';
+    let btn = document.getElementById('theme-toggle');
+    if (!btn) {
+        btn = document.createElement('button');
+        btn.className = 'theme-toggle';
+        btn.id = 'theme-toggle';
+        btn.setAttribute('aria-label', 'Toggle dark mode');
+        btn.title = 'Toggle dark mode';
+        bar.appendChild(btn);
+    }
     btn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀︎' : '☾';
     btn.onclick = function() {
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -907,7 +915,6 @@ document.getElementById('tb-qt').textContent = QS.length;
         } catch (e) {}
     }
     ;
-    bar.appendChild(btn);
 }
 )();
 
