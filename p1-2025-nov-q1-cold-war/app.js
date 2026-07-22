@@ -861,7 +861,7 @@ function showResults() {
   </div>
   <div style="text-align:center;margin-top:1.5rem">
     <button class="bs" onclick="location.reload()">Try Again</button>
-    ${p >= 70 ? `<div style="margin-top:1.5rem;padding:1.2rem;background:linear-gradient(135deg,#1B4F72,#2E86C1);border-radius:6px;text-align:center"><div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.25em;color:#D4A745;font-weight:700;margin-bottom:.4rem">★ Bonus Section Unlocked</div><div style="color:#fff;font-size:.95rem;margin-bottom:.8rem">You scored ${p}%. Well done! You've unlocked the <strong>Mark This Answer</strong> bonus section. Evaluate two paragraph answers to earn up to 12 bonus marks.</div><button class="bs" style="background:#D4A745;color:#1C2733" onclick="goMTA()">Start Bonus Section →</button></div>` : `<div style="margin-top:1rem;padding:1rem;background:var(--frost);border:1px solid var(--bdr);border-radius:4px"><div style="font-size:.82rem;color:var(--txt2)"><strong>Bonus section locked.</strong> Score 70% or higher to unlock the Mark This Answer bonus section, where you can earn up to 12 extra marks by evaluating sample paragraph answers.</div></div>`}
+    ${p >= 70 ? `<div style="margin-top:1.5rem;padding:1.2rem;background:linear-gradient(135deg,#1B4F72,#2E86C1);border-radius:6px;text-align:center"><div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.25em;color:#D4A745;font-weight:700;margin-bottom:.4rem">★ Bonus Section Unlocked</div><div style="color:#fff;font-size:.95rem;margin-bottom:.8rem">You scored ${p}%. Well done! You've unlocked the bonus round: mark two sample paragraph answers like an examiner to earn up to 12 bonus marks.</div><button class="bs" style="background:#D4A745;color:#1C2733" onclick="goMTA()">Start Bonus Section →</button></div>` : `<div style="margin-top:1rem;padding:1rem;background:var(--frost);border:1px solid var(--bdr);border-radius:4px"><div style="font-size:.82rem;color:var(--txt2)"><strong>Bonus round locked.</strong> Score 70% or higher to unlock it and earn up to 12 extra marks by marking two sample answers like an examiner.</div></div>`}
     </div>
   </div>`;
     // ── Level breakdown bars + per-question time analytics + review-wrong button ──
@@ -1185,6 +1185,14 @@ if ('serviceWorker'in navigator) {
             learnerName = n;
         }
     } catch (e) {}
+    // Optional: host (Kula Learn) can personalise by passing ?name=... in the iframe URL.
+    // The learner is never asked to type their name; if no name is supplied, greetings stay generic.
+    try {
+        const qn = new URLSearchParams(location.search).get('name');
+        if (qn && qn.trim()) {
+            learnerName = qn.trim();
+        }
+    } catch (e) {}
     const nameInp = document.getElementById('learner-name');
     if (nameInp) {
         if (learnerName) {
@@ -1245,13 +1253,7 @@ if ('serviceWorker'in navigator) {
         }
     }
     // Keyboard shortcuts hint at bottom of overlay
-    const bd2 = overlay.querySelector('.sm-bd');
-    if (bd2) {
-        const hint = document.createElement('div');
-        hint.className = 'kbd-hint';
-        hint.innerHTML = 'Tip: use <kbd>1</kbd>–<kbd>9</kbd> to choose options, <kbd>Enter</kbd> to submit/next, <kbd>←</kbd>/<kbd>→</kbd> to navigate.';
-        bd2.appendChild(hint);
-    }
+    // (keyboard tip already lives in the static start-overlay markup — no second copy)
 }
 )();
 
