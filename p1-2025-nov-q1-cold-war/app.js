@@ -490,6 +490,50 @@ function onNameInput() {
 }
 window.onNameInput = onNameInput;
 
+// ── Paragraph builder: live "your paragraph so far" panel + model comparison ──
+function paraModelText() {
+    if (typeof MTA_ANSWERS === 'undefined' || !MTA_ANSWERS || !MTA_ANSWERS.length)
+        return '';
+    var strong = MTA_ANSWERS.filter(function(a) {
+        return (a.expM || '').indexOf('8') > -1;
+    });
+    var pick = strong.length ? strong[strong.length - 1] : MTA_ANSWERS[MTA_ANSWERS.length - 1];
+    return pick ? pick.text : '';
+}
+function paraPanelHtml() {
+    var ids = QS.filter(function(q) {
+        return q.src === 'para';
+    }).map(function(q) {
+        return q.id;
+    });
+    if (!ids.length)
+        return '';
+    var chosen = [];
+    ids.forEach(function(id) {
+        var qq = QS.find(function(x) {
+            return x.id === id;
+        });
+        var a = ans[id];
+        if (qq && a && a.done && a.sel != null && !Array.isArray(a.sel))
+            chosen.push(qq.opts[a.sel]);
+    });
+    if (!chosen.length)
+        return '';
+    var para = chosen.join(' ');
+    var complete = chosen.length === ids.length;
+    var onLast = QS[curQ].id === ids[ids.length - 1];
+    var html = '<div class="para-build"><div class="para-build-h">&#9998; Your paragraph so far</div><div class="para-build-body">' + para + '</div>';
+    if (!complete)
+        html += '<div class="para-build-note">Keep choosing &mdash; each line you pick is added here, so you can watch your paragraph take shape rather than just picking options.</div>';
+    html += '</div>';
+    if (complete && onLast) {
+        var model = paraModelText();
+        if (model)
+            html += '<div class="para-model"><div class="para-model-h">&#9733; A full-mark example</div><div class="para-model-body">' + model + '</div><div class="para-build-note">Compare this with the paragraph you built above. Notice how it weaves source evidence and your own knowledge into one flowing argument.</div></div>';
+    }
+    return html;
+}
+
 function render() {
     const q = QS[curQ];
     const s = SRC[q.src];
@@ -523,6 +567,7 @@ function render() {
     <div class="ol" id="opts">${q.opts.map( (o, i) => `<button class="ob${ans[q.id]?.done ? (q.multi ? (q.c.includes(i) ? ' ok' : ((ans[q.id].sel || []).includes(i) ? ' no' : ' dim')) : (i === q.c ? ' ok' : (i === ans[q.id].sel ? ' no' : ' dim'))) : ((ans[q.id]?.sel != null && !q.multi && ans[q.id].sel === i) ? ' sel' : (q.multi && (ans[q.id]?.sel || []).includes(i) ? ' sel' : ''))}" data-i="${i}" ${ans[q.id]?.done ? 'disabled' : ''} onclick="${q.multi ? `tmm(${i},${q.mx})` : `sll(${i})`}"><span class="ol2">${L[i]}.</span><span style="flex:1">${o}</span><span class="om">${ans[q.id]?.done ? (q.multi ? (q.c.includes(i) ? '✓' : ((ans[q.id].sel || []).includes(i) ? '✗' : '')) : (i === q.c ? '✓' : (i === ans[q.id].sel ? '✗' : ''))) : ''}</span></button>`).join('')}</div>
     ${!ans[q.id]?.done ? `<div style="text-align:right;margin-top:.8rem"><button class="bs" id="sub-btn" onclick="submitQ()" ${ans[q.id]?.sel == null || (q.multi && (!ans[q.id]?.sel || ans[q.id].sel.length < q.mx)) ? 'disabled' : ''}>Submit</button></div>` : ''}
     <div class="fb ${ans[q.id]?.done ? ' show' : ''}${ans[q.id]?.ok ? ' fbg' : ''}${ans[q.id]?.done && !ans[q.id]?.ok ? ' fbb' : ''}" id="fb" aria-live="polite" role="status">${ans[q.id]?.done ? `<div class="fbl ${ans[q.id].ok ? 'flg' : 'flb'}">${ans[q.id].ok ? '✓ Correct, ' + q.m + ' mark' + (q.m > 1 ? 's' : '') + ' earned' : '✗ Not quite. 0 marks'}</div><div>${q.fb}</div>` : ''}</div>
+    ${q.src === 'para' ? paraPanelHtml() : ''}
     <div class="nav-row">
       <button class="b2" onclick="prev()" ${isFirst ? 'disabled' : ''}>← Previous</button>
       ${isLast ? `<button class="bs" onclick="showResults()">View Results →</button>` : `<button class="bs" onclick="next()">Next →</button>`}
